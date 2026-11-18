@@ -5,7 +5,7 @@ export type Task = {
   name: string;
   date: string | null;
   completed: boolean;
-  tags: string[] | [];
+  tags?: string[];
 };
 
 export type Category = {

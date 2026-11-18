@@ -37,7 +37,9 @@ const items = computed<Option[]>(() => {
       ? categoryId.value
         ? []
         : categories.value
-      : tags.value.filter((t) => !tagsIds.value.includes(t.id));
+      : tags.value
+          .filter((t) => !tagsIds.value.includes(t.id))
+          .sort((a, b) => a.name.localeCompare(b.name));
 
   const q = query.toLocaleLowerCase();
   return source.filter((s) => s.name.toLocaleLowerCase().startsWith(q));

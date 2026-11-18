@@ -1,4 +1,5 @@
 import type { Category, Tag, Task } from '@/types/todolist';
+import Fuse from 'fuse.js';
 import { defineStore } from 'pinia';
 
 export const UNCATEGORIZED = 'none';
@@ -11,8 +12,18 @@ export const useTodolistStore = defineStore('todolist', {
     categories: <Category[]>[],
     tags: <Tag[]>[],
     layout: <Record<string, string[]>>{ [UNCATEGORIZED]: [] },
+    search: <string>'',
+    tagFilter: <string | null>null,
   }),
   getters: {
+    fuse(): Fuse<Task> {
+      return new Fuse(this.allTasks, {
+        keys: ['name'],
+        threshold: 0.35,
+        ignoreLocation: true,
+        ignoreDiacritics: true,
+      });
+    },
     allTasks: (state): Task[] => {
       return state.tasks.map((task: Task) => ({ ...task }));
     },
@@ -20,19 +31,15 @@ export const useTodolistStore = defineStore('todolist', {
       return new Map(this.allTasks.map((task) => [task.id, task]));
     },
     tasksFiltered(): Task[] {
-      return this.allTasks;
+      const q = this.search.trim();
+      const results = q ? this.fuse.search(q).map((r) => r.item) : this.allTasks;
+      return results.filter((t) => !this.tagFilter || t.tags?.includes(this.tagFilter));
+    },
+    filteredIds(): Set<string> {
+      return new Set(this.tasksFiltered.map((t) => t.id));
     },
     tasksCompleted(): Task[] {
       return this.allTasks.filter((task) => task.completed);
-    },
-    statistics() {
-      const min = this.tasksCompleted.length;
-      const max = this.tasksFiltered.length;
-      return {
-        min,
-        max,
-        pc: Math.min(Math.round((min / max) * 100), 100),
-      };
     },
     categoryOf:
       (state) =>

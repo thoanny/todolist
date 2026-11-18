@@ -19,6 +19,7 @@ import {
   IconSquareRoundedCheck,
   IconTrash,
   IconUser,
+  IconX,
 } from '@tabler/icons-vue';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -43,7 +44,8 @@ const {
   removeTask,
   duplicateTask,
 } = todolistStore;
-const { tasksFiltered, tasksById, categories, layout, tags } = storeToRefs(todolistStore);
+const { tasksFiltered, tasksById, categories, layout, tags, search, filteredIds, tagFilter } =
+  storeToRefs(todolistStore);
 
 const currentTypeId = ref<'task' | 'tag' | 'category' | 'tab' | string>('task');
 const currentType = computed(() => {
@@ -91,8 +93,13 @@ const sections = computed(() => [
   ...categories.value,
 ]);
 
-const tasksOf = (sectionId: string) =>
-  (layout.value[sectionId] ?? []).map((id) => tasksById.value.get(id)!);
+const tasksOf = (sectionId: string): Task[] =>
+  (layout.value[sectionId] ?? [])
+    .filter((id) => filteredIds.value.has(id))
+    .map((id) => tasksById.value.get(id))
+    .filter((task): task is Task => task !== undefined);
+
+const dragDisabled = computed(() => !!search.value.trim() || !!tagFilter.value);
 
 const getTagName = (id: string) => {
   return tags.value.find((t) => t.id === id)?.name || 'Inconnu';
@@ -145,6 +152,10 @@ const onKeydown = (e: KeyboardEvent) => {
 
   if (mod && e.key.toLowerCase() === 'k') {
     e.preventDefault();
+    if (showSearch.value) {
+      search.value = '';
+      tagFilter.value = null;
+    }
     showSearch.value = !showSearch.value;
     return;
   } else if (e.key === '1' || e.key === '&') {
@@ -226,12 +237,30 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
   </header>
 
   <main class="flex flex-col grow select-none">
-    <div class="p-4 flex border-b border-base-300" v-show="showSearch">
-      <!-- TODO -->
-      <div class="input grow">
-        <input type="search" placeholder="TODO : Chercher une tâche" class="grow" />
+    <div class="p-4 flex flex-col sm:flex-row border-b border-base-300 gap-2" v-show="showSearch">
+      <div class="input grow w-full">
+        <IconSearch class="opacity-25 size-5" />
+        <input type="text" placeholder="Chercher des tâches" class="grow" v-model="search" />
         <kbd class="kbd kbd-sm">Ctrl+K</kbd>
       </div>
+      <select class="select" v-model="tagFilter">
+        <option :value="null">-- Étiquette --</option>
+        <option :value="tag.id" v-for="tag in tags" :key="tag.id" class="truncate">
+          #{{ tag.name }}
+        </option>
+      </select>
+      <button
+        type="button"
+        @click="
+          search = '';
+          tagFilter = null;
+        "
+        class="btn sm:btn-square"
+        :disabled="!dragDisabled"
+      >
+        <IconX class="size-4" />
+        <span class="sm:hidden">Réinitialiser les filtres</span>
+      </button>
     </div>
     <div class="flex flex-col grow">
       <template v-if="tasksFiltered.length > 0">
@@ -245,6 +274,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
               menu.open(e, 168, 244);
             }
           "
+          v-show="!search || tasksOf(section.id).length"
         >
           <header class="flex gap-2 items-center py-2 px-4 border-b border-base-300 bg-base-200">
             <div class="cursor-pointer" @click.prevent="toggleCategoryCollapsed(section.id)">
@@ -261,6 +291,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
             handle=".drag-handle"
             :animation="150"
             v-show="!section.collapsed"
+            :disabled="dragDisabled"
           >
             <div
               v-for="task in tasksOf(section.id)"
@@ -274,8 +305,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
                 }
               "
             >
-              <div class="drag-handle cursor-grab">
-                <IconGripVertical class="size-5 text-base-content/50" />
+              <div
+                class="drag-handle"
+                :class="{ 'cursor-no-drop': dragDisabled, 'cursor-grab': !dragDisabled }"
+              >
+                <IconGripVertical
+                  class="size-5"
+                  :class="{
+                    'text-base-content/50': !dragDisabled,
+                    'text-base-content/10': dragDisabled,
+                  }"
+                />
               </div>
               <div class="cursor-pointer" @click="toggleTaskCompleted(task.id)">
                 <IconSquareRounded stroke="1.5" v-if="!task.completed" class="" />
