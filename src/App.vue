@@ -2,6 +2,7 @@
 import AddTagField from '@/components/AddTagField.vue';
 import AddTaskField from '@/components/AddTaskField.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
+import { initAuth } from '@/composables/useAuth';
 import { useContextMenu } from '@/composables/useContextMenu';
 import { UNCATEGORIZED, useTodolistStore } from '@/stores/todolist';
 import { colors, types, type Task } from '@/types/todolist';
@@ -18,12 +19,14 @@ import {
   IconSquareRounded,
   IconSquareRoundedCheck,
   IconTrash,
-  IconUser,
   IconX,
 } from '@tabler/icons-vue';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
+import AuthButton from './components/AuthButton.vue';
+
+initAuth();
 
 const menu = useContextMenu();
 const activeMenuItem = ref<{ type: null | string; id: null | string; open: boolean }>({
@@ -229,10 +232,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <button class="btn btn-primary btn-square" v-if="false">
         <IconSearch class="size-5" />
       </button>
-      <button class="btn btn-secondary lg:btn-square">
-        <IconUser />
-        <span class="lg:hidden">Se connecter</span>
-      </button>
+      <AuthButton />
     </div>
   </header>
 
