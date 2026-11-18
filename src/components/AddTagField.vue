@@ -47,7 +47,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     }"
     class="dropdown fixed w-auto bg-base-100 z-100 mt-2 border border-base-300 rounded-box"
   >
-    <ul class="menu w-full max-h-64 overflow-y-auto flex-nowrap">
+    <ul class="menu w-full max-h-66 overflow-y-auto flex-nowrap">
       <li v-for="c in colors" :key="c.id">
         <button type="button" @click="selectColor(c.id)" :data-color="c.id">
           <IconSquareRoundedFilled :class="[`text-${c.id}`, 'size-5']" />

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useTodolistStore } from '@/stores/todolist';
+import { IconSquareRoundedFilled } from '@tabler/icons-vue';
 import { storeToRefs } from 'pinia';
 import { computed, nextTick, ref } from 'vue';
 
 defineProps<{ placeholder?: string }>();
 
-type Option = { id: string; name: string };
+type Option = { id: string; name: string; color?: string | null };
 type Trigger = { char: '/' | '#'; query: string; start: number; caret: number };
 
 const name = defineModel<string | null>('name');
@@ -142,10 +143,15 @@ const onKeydown = (e: KeyboardEvent) => {
       'dropdown-open': items.length,
     }"
     class="dropdown fixed w-auto bg-base-100 z-100 mt-2 border border-base-300 rounded-box"
+    popover
   >
     <ul v-if="items.length" class="menu w-full">
       <li v-for="(item, i) in items" :key="item.id">
         <a :class="{ 'menu-active': i === active }" @mousedown.prevent="pick(item)">
+          <IconSquareRoundedFilled
+            :class="[`text-${item.color}`, 'size-5', { 'text-secondary': !item.color }]"
+            v-if="trigger?.char === '#'"
+          />
           {{ trigger?.char }}{{ item.name }}
         </a>
       </li>
