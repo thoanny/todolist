@@ -10,7 +10,7 @@ defineProps<{
   <Teleport to="body">
     <ul
       v-if="menu.visible.value"
-      class="menu bg-base-100 border border-base-300 rounded-box w-42"
+      class="menu bg-base-100 border border-base-300 rounded-box w-42 z-100"
       :style="{
         position: 'fixed',
         left: menu.x.value + 'px',

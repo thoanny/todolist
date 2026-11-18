@@ -181,6 +181,14 @@ export const useTodolistStore = defineStore('todolist', {
         task.completed = !task.completed;
       }
     },
+    updateCategorieTasksCompleted(categoryId: string, checked: boolean) {
+      const ids = new Set((this.layout[categoryId] ?? []).filter((id) => this.filteredIds.has(id)));
+      for (const task of this.tasks) {
+        if (ids.has(task.id)) {
+          task.completed = checked;
+        }
+      }
+    },
     resetTasksCompleted() {
       this.tasks = this.tasks.map((task) => ({ ...task, completed: false }));
     },

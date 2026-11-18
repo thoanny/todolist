@@ -46,6 +46,7 @@ const {
   addTag,
   removeTask,
   duplicateTask,
+  updateCategorieTasksCompleted,
 } = todolistStore;
 const { tasksFiltered, tasksById, categories, layout, tags, search, filteredIds, tagFilter } =
   storeToRefs(todolistStore);
@@ -124,6 +125,12 @@ const handleRemoveCategory = () => {
     categoryId.value = null;
   }
   removeCategory(activeMenuItem.value.id);
+  menu.close();
+};
+
+const handleUpdateCatagorieTasksCompleted = (checked: boolean) => {
+  if (!activeMenuItem.value.id || activeMenuItem.value.type !== 'category') return;
+  updateCategorieTasksCompleted(activeMenuItem.value.id, checked);
   menu.close();
 };
 
@@ -276,7 +283,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
           "
           v-show="!search || tasksOf(section.id).length"
         >
-          <header class="flex gap-2 items-center py-2 px-4 border-b border-base-300 bg-base-200">
+          <header
+            class="flex gap-2 items-center py-2 px-4 border-b border-base-300 bg-base-200"
+            :class="{
+              'text-base-content/50': section.collapsed,
+            }"
+          >
             <div class="cursor-pointer" @click.prevent="toggleCategoryCollapsed(section.id)">
               <IconFolderOpen t v-if="section.id === UNCATEGORIZED || !section.collapsed" />
               <IconFolder v-else />
@@ -369,10 +381,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     </template>
     <template v-if="activeMenuItem.type === 'category' && activeMenuItem.id">
       <li>
-        <button class="text-warning"><IconSquareRoundedCheck class="size-4" /> Tout cocher</button>
+        <button @click="handleUpdateCatagorieTasksCompleted(true)">
+          <IconSquareRoundedCheck class="size-4" /> Tout cocher
+        </button>
       </li>
       <li>
-        <button class="text-warning"><IconSquareRounded class="size-4" /> Tout décocher</button>
+        <button @click="handleUpdateCatagorieTasksCompleted(false)">
+          <IconSquareRounded class="size-4" /> Tout décocher
+        </button>
       </li>
       <li>
         <button class="text-warning" :disabled="activeMenuItem.id === UNCATEGORIZED">
