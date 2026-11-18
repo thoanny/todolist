@@ -1,35 +1,37 @@
-@import './base.css';
+@import 'tailwindcss';
+@plugin "daisyui";
+
+@source inline('{text,bg}-{red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuschia,pink,stone,zinc,gray,slate}');
+
+@theme {
+  --color-red: oklch(0.637 0.237 25.331);
+  --color-orange: oklch(0.705 0.213 47.604);
+  --color-amber: oklch(0.769 0.188 70.08);
+  --color-yellow: oklch(0.795 0.184 86.047);
+  --color-lime: oklch(0.768 0.233 130.85);
+  --color-green: oklch(0.723 0.219 149.579);
+  --color-emerald: oklch(0.696 0.17 162.48);
+  --color-teal: oklch(0.704 0.14 182.503);
+  --color-cyan: oklch(0.715 0.143 215.221);
+  --color-sky: oklch(0.685 0.169 237.323);
+  --color-blue: oklch(0.623 0.214 259.815);
+  --color-indigo: oklch(0.585 0.233 277.117);
+  --color-violet: oklch(0.606 0.25 292.717);
+  --color-purple: oklch(0.627 0.265 303.9);
+  --color-fuschia: oklch(0.667 0.295 322.15);
+  --color-pink: oklch(0.656 0.241 354.308);
+  --color-stone: oklch(0.553 0.013 58.071);
+  --color-zinc: oklch(0.552 0.016 285.938);
+  --color-gray: oklch(0.551 0.027 264.364);
+  --color-slate: oklch(0.554 0.046 257.417);
+}
+
+html,
+body,
+#app {
+  @apply min-h-screen;
+}
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
-}
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+  @apply flex flex-col;
 }
