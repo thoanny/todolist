@@ -37,7 +37,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     <div style="anchor-name: --popover-anchor-tag" @click="open = !open" class="cursor-pointer">
       <IconSquareRoundedFilled :class="[`text-${color}`, 'size-5']" />
     </div>
-    <input type="text" v-model="name" @focus="open = false" class="grow" ref="input" :placeholder />
+    <input
+      type="text"
+      v-model="name"
+      @focus="open = false"
+      class="grow"
+      ref="input"
+      :placeholder
+      id="add_tag_name"
+    />
   </div>
   <div
     popover

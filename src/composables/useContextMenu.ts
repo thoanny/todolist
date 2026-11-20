@@ -48,7 +48,7 @@ export const useContextMenu = () => {
     window.removeEventListener('click', close);
     window.removeEventListener('contextmenu', close);
     window.removeEventListener('scroll', close);
-    window.addEventListener('keydown', onKeydown);
+    window.removeEventListener('keydown', onKeydown);
   });
 
   return { visible, x, y, open, close };

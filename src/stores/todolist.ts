@@ -84,6 +84,19 @@ export const useTodolistStore = defineStore('todolist', {
       this.categories.push({ id: key, name: clean, collapsed: false });
       this.layout[key] = [];
     },
+    updateCategory(category: Category) {
+      if (!category.name) {
+        throw new Error('Le nom est obligatoire');
+      }
+      const existing = this.categories.find((c) => c.id === category.id);
+      if (existing) {
+        Object.assign(existing, category);
+      }
+
+      this.syncLayout();
+
+      return true;
+    },
     removeCategory(categoryId: string) {
       const idx = this.categories.findIndex((c) => c.id === categoryId);
       if (idx < 0) {
@@ -131,14 +144,12 @@ export const useTodolistStore = defineStore('todolist', {
       return true;
     },
     updateTask(task: Task, categoryId: string = UNCATEGORIZED) {
-      if (typeof task.id === 'string') {
-        if (!task.name) {
-          throw new Error('Le titre est obligatoire');
-        }
-        const existing = this.tasks.find((t) => t.id === task.id);
-        if (existing) {
-          Object.assign(existing, task);
-        }
+      if (!task.name) {
+        throw new Error('Le titre est obligatoire');
+      }
+      const existing = this.tasks.find((t) => t.id === task.id);
+      if (existing) {
+        Object.assign(existing, task);
       }
 
       if (categoryId !== this.categoryOf(task.id)) {

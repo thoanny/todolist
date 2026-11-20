@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import AddTagField from '@/components/AddTagField.vue';
 import AddTaskField from '@/components/AddTaskField.vue';
+import AuthButton from '@/components/AuthButton.vue';
 import ContextMenu from '@/components/ContextMenu.vue';
+import EditTaskModal from '@/components/EditTaskModal.vue';
 import { initAuth } from '@/composables/useAuth';
 import { useContextMenu } from '@/composables/useContextMenu';
 import { UNCATEGORIZED, useTodolistStore } from '@/stores/todolist';
@@ -24,7 +26,7 @@ import {
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { VueDraggable } from 'vue-draggable-plus';
-import AuthButton from './components/AuthButton.vue';
+import EditCategoryModal from './components/EditCategoryModal.vue';
 
 initAuth();
 
@@ -61,6 +63,8 @@ const color = ref(colors[0]!.id);
 const categoryId = ref();
 const tagsIds = ref([]);
 const showSearch = ref<boolean>(true);
+const editTaskModal = ref();
+const editCategoryModal = ref();
 
 const handleSubmit = () => {
   switch (currentTypeId.value) {
@@ -152,6 +156,18 @@ const handleDuplicateTask = () => {
   menu.close();
 };
 
+const handleEditTask = () => {
+  if (!activeMenuItem.value.id || activeMenuItem.value.type !== 'task') return;
+  editTaskModal.value?.open(activeMenuItem.value.id);
+  menu.close();
+};
+
+const handleEditCategory = () => {
+  if (!activeMenuItem.value.id || activeMenuItem.value.type !== 'category') return;
+  editCategoryModal.value?.open(activeMenuItem.value.id);
+  menu.close();
+};
+
 const isTyping = (e: KeyboardEvent) => {
   const t = e.target as HTMLElement;
   return ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName) || t.isContentEditable;
@@ -216,6 +232,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
           :placeholder="currentType?.add_item"
           v-model="name"
           v-if="currentTypeId === 'category'"
+          id="add_category_name"
         />
         <AddTaskField
           :placeholder="currentType?.add_item"
@@ -247,10 +264,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     <div class="p-4 flex flex-col sm:flex-row border-b border-base-300 gap-2" v-show="showSearch">
       <div class="input grow w-full">
         <IconSearch class="opacity-25 size-5" />
-        <input type="text" placeholder="Chercher des tâches" class="grow" v-model="search" />
+        <input
+          type="text"
+          placeholder="Chercher des tâches"
+          class="grow"
+          v-model="search"
+          id="search_query"
+        />
         <kbd class="kbd kbd-sm">Ctrl+K</kbd>
       </div>
-      <select class="select" v-model="tagFilter">
+      <select class="select" v-model="tagFilter" id="search_tag_filter">
         <option :value="null">-- Étiquette --</option>
         <option :value="tag.id" v-for="tag in tags" :key="tag.id" class="truncate">
           #{{ tag.name }}
@@ -290,10 +313,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
             }"
           >
             <div class="cursor-pointer" @click.prevent="toggleCategoryCollapsed(section.id)">
-              <IconFolderOpen t v-if="section.id === UNCATEGORIZED || !section.collapsed" />
-              <IconFolder v-else />
+              <IconFolderOpen
+                v-if="section.id === UNCATEGORIZED || !section.collapsed"
+                class="size-5"
+              />
+              <IconFolder v-else class="size-5" />
             </div>
-            <h2 class="grow font-bold">{{ section.name }}</h2>
+            <h2 class="grow font-bold text-sm">{{ section.name }}</h2>
           </header>
 
           <VueDraggable
@@ -322,7 +348,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
                 :class="{ 'cursor-no-drop': dragDisabled, 'cursor-grab': !dragDisabled }"
               >
                 <IconGripVertical
-                  class="size-5"
+                  class="size-4"
                   :class="{
                     'text-base-content/50': !dragDisabled,
                     'text-base-content/10': dragDisabled,
@@ -330,10 +356,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
                 />
               </div>
               <div class="cursor-pointer" @click="toggleTaskCompleted(task.id)">
-                <IconSquareRounded stroke="1.5" v-if="!task.completed" class="" />
-                <IconSquareRoundedCheck stroke="1.5" v-else />
+                <IconSquareRounded v-if="!task.completed" class="size-5" />
+                <IconSquareRoundedCheck v-else class="size-5" />
               </div>
-              <span :for="`task_${task.id}`" class="grow font-semibold">{{ task.name }}</span>
+              <span :for="`task_${task.id}`" class="grow font-semibold text-sm">{{
+                task.name
+              }}</span>
               <span class="inline-flex gap-1">
                 <span
                   v-for="tag in task.tags"
@@ -370,7 +398,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
         </button>
       </li>
       <li>
-        <button class="text-warning"><IconPencil class="size-4" /> Modifier</button>
+        <button @click="handleEditTask"><IconPencil class="size-4" /> Modifier</button>
       </li>
       <li>
         <button @click="handleDuplicateTask"><IconCopy class="size-4" /> Dupliquer</button>
@@ -391,9 +419,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
         </button>
       </li>
       <li>
-        <button class="text-warning" :disabled="activeMenuItem.id === UNCATEGORIZED">
-          <IconPencil class="size-4" />
-          Modifier
+        <button @click="handleEditCategory" :disabled="activeMenuItem.id === UNCATEGORIZED">
+          <IconPencil class="size-4" /> Modifier
         </button>
       </li>
       <li>
@@ -426,4 +453,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <button class="uppercase">{{ activeMenuItem.type }}: {{ activeMenuItem.id }}</button>
     </li>
   </ContextMenu>
+
+  <EditTaskModal ref="editTaskModal" />
+  <EditCategoryModal ref="editCategoryModal" />
 </template>

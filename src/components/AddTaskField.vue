@@ -136,8 +136,9 @@ const onKeydown = (e: KeyboardEvent) => {
       @click="onInput"
       @blur="trigger = null"
       :placeholder
+      id="add_task_name"
     />
-    <input type="date" class="input w-28" v-model="date" />
+    <input type="date" class="input w-28" v-model="date" id="add_task_date" />
   </div>
   <div
     style="position-anchor: --popover-anchor-task"
