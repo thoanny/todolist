@@ -37,7 +37,6 @@ export const types = [
     items_list: 'Liste des tâches',
     filter_items: 'Filtrer les tâches',
     icon: IconCheckbox,
-    kbd: '1',
   },
   {
     id: 'tag',
@@ -54,7 +53,6 @@ export const types = [
     items_list: 'Liste des étiquettes',
     filter_items: 'Filtrer les étiquettes',
     icon: IconTag,
-    kbd: '2',
   },
   {
     id: 'category',
@@ -71,7 +69,6 @@ export const types = [
     items_list: 'Liste des catégories',
     filter_items: 'Filtrer les catégories',
     icon: IconFolderOpen,
-    kbd: '3',
   },
 ];
 

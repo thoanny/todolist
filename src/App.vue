@@ -64,6 +64,7 @@ const color = ref(colors[0]!.id);
 const categoryId = ref();
 const tagsIds = ref([]);
 const showSearch = ref<boolean>(true);
+const showShortcutsPanel = ref<boolean>(false);
 const editTaskModal = ref();
 const editCategoryModal = ref();
 
@@ -179,15 +180,19 @@ const isTyping = (e: KeyboardEvent) => {
 };
 
 const onKeydown = (e: KeyboardEvent) => {
-  const mod = e.ctrlKey || e.metaKey;
+  // const mod = e.ctrlKey || e.metaKey;
 
-  if (mod && e.key.toLowerCase() === 'k') {
+  if (e.key.toLowerCase() === 'k') {
     e.preventDefault();
     if (showSearch.value) {
       search.value = '';
       tagFilter.value = null;
     }
     showSearch.value = !showSearch.value;
+    return;
+  } else if (e.key.toLowerCase() === 'h') {
+    e.preventDefault();
+    showShortcutsPanel.value = !showShortcutsPanel.value;
     return;
   } else if (e.key === '1' || e.key === '&') {
     if (isTyping(e)) return;
@@ -197,7 +202,7 @@ const onKeydown = (e: KeyboardEvent) => {
     if (isTyping(e)) return;
     currentTypeId.value = 'tag';
     return;
-  } else if (e.key === '3' || e.key === '"&é"') {
+  } else if (e.key === '3' || e.key === '"') {
     if (isTyping(e)) return;
     currentTypeId.value = 'category';
     return;
@@ -238,7 +243,6 @@ onBeforeUnmount(() => {
           >
             <component :is="type.icon" v-if="type.icon" class="size-4" />
             {{ type.name }}
-            <kbd class="kbd kbd-sm">{{ type.kbd }}</kbd>
           </button>
         </div>
       </div>
@@ -288,7 +292,6 @@ onBeforeUnmount(() => {
           v-model="search"
           id="search_query"
         />
-        <kbd class="kbd kbd-sm">Ctrl+K</kbd>
       </div>
       <select class="select" v-model="tagFilter" id="search_tag_filter">
         <option :value="null">-- Étiquette --</option>
@@ -518,4 +521,35 @@ onBeforeUnmount(() => {
 
   <EditTaskModal ref="editTaskModal" />
   <EditCategoryModal ref="editCategoryModal" />
+
+  <div
+    class="card card-xs bg-base-100 border border-base-300 fixed bottom-4 left-4 cursor-pointer"
+    @click="showShortcutsPanel = !showShortcutsPanel"
+    :class="{
+      'w-46': showShortcutsPanel,
+      'w-9': !showShortcutsPanel,
+    }"
+  >
+    <div class="card-body" v-if="showShortcutsPanel">
+      <div class="card-title">Raccourcis</div>
+      <div class="flex gap-1 items-center"><kbd class="kbd kbd-xs">1</kbd> Ajouter des tâches</div>
+      <div class="flex gap-1 items-center">
+        <kbd class="kbd kbd-xs">2</kbd> Ajouter des étiquettes
+      </div>
+      <div class="flex gap-1 items-center">
+        <kbd class="kbd kbd-xs">3</kbd> Ajouter des catégories
+      </div>
+      <div class="flex gap-1 items-center">
+        <kbd class="kbd kbd-xs">K</kbd> Afficher/Masquer les filtres
+      </div>
+      <div class="flex gap-1 items-center">
+        <kbd class="kbd kbd-xs">H</kbd> Afficher/Masquer ce panneau
+      </div>
+    </div>
+    <div class="card-body" v-else>
+      <div>
+        <kbd class="kbd kbd-xs">H</kbd>
+      </div>
+    </div>
+  </div>
 </template>
