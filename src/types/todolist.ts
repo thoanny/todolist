@@ -6,6 +6,7 @@ export type Task = {
   date: string | null;
   completed: boolean;
   tags?: string[];
+  link?: string | null;
 };
 
 export type Category = {

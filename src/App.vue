@@ -15,6 +15,7 @@ import {
   IconFolder,
   IconFolderOpen,
   IconGripVertical,
+  IconLink,
   IconPencil,
   IconPlus,
   IconSearch,
@@ -378,7 +379,7 @@ onBeforeUnmount(() => {
                 <IconSquareRoundedCheck v-else class="size-5" />
               </div>
               <span :for="`task_${task.id}`" class="grow font-semibold text-sm">{{
-                task.name
+                task.link ? task.name.replace(task.link, '').trim() : task.name
               }}</span>
               <span class="inline-flex gap-1">
                 <span
@@ -396,6 +397,15 @@ onBeforeUnmount(() => {
                   )
                 }}
               </span>
+              <a
+                :href="task.link"
+                ref="noopener noreferrer"
+                target="_blank"
+                class="btn btn-circle btn-neutral btn-xs"
+                v-if="task.link"
+              >
+                <IconLink class="size-4" />
+              </a>
             </div>
           </VueDraggable>
         </section>

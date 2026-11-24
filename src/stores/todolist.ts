@@ -1,4 +1,5 @@
 import type { Category, Tag, Task } from '@/types/todolist';
+import { extractFirstUrl } from '@/utils/url';
 import Fuse from 'fuse.js';
 import { defineStore } from 'pinia';
 
@@ -25,7 +26,10 @@ export const useTodolistStore = defineStore('todolist', {
       });
     },
     allTasks: (state): Task[] => {
-      return state.tasks.map((task: Task) => ({ ...task }));
+      return state.tasks.map((task: Task) => {
+        const link = extractFirstUrl(task.name) ?? null;
+        return { ...task, link };
+      });
     },
     tasksById(): Map<string, Task> {
       return new Map(this.allTasks.map((task) => [task.id, task]));
