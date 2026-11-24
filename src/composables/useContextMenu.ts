@@ -28,6 +28,10 @@ export const useContextMenu = () => {
 
   const close = (): void => {
     visible.value = false;
+    const event = new CustomEvent('closeContextMenu', {
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
   };
 
   const onKeydown = (e: KeyboardEvent) => {

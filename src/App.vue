@@ -117,6 +117,10 @@ const getTagColor = (id: string) => {
   return tags.value.find((t) => t.id === id)?.color || 'secondary';
 };
 
+const resetActiveMenuItem = () => {
+  activeMenuItem.value = { id: null, type: null, open: false };
+};
+
 const handleMoveCategory = (direction: 1 | -1) => {
   if (!activeMenuItem.value.id || activeMenuItem.value.type !== 'category') return;
   moveCategory(activeMenuItem.value.id, direction);
@@ -199,8 +203,14 @@ const onKeydown = (e: KeyboardEvent) => {
   }
 };
 
-onMounted(() => window.addEventListener('keydown', onKeydown));
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown);
+  window.addEventListener('closeContextMenu', resetActiveMenuItem);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown);
+  window.removeEventListener('closeContextMenu', resetActiveMenuItem);
+});
 </script>
 
 <template>
@@ -298,21 +308,24 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
           v-for="section in sections"
           :key="section.id"
           class=""
-          @contextmenu.prevent.stop="
-            (e) => {
-              activeMenuItem = { type: 'category', id: section.id, open: !section.collapsed };
-              menu.open(e, 168, 244);
-            }
-          "
           v-show="!search || tasksOf(section.id).length"
         >
           <header
-            class="flex gap-2 items-center py-2 px-4 border-b border-base-300 bg-base-200"
+            class="flex gap-2 items-center py-2 px-4 border-b border-base-300 bg-base-200 cursor-pointer"
             :class="{
               'text-base-content/50': section.collapsed,
+              'text-primary':
+                activeMenuItem.id === section.id && activeMenuItem.type === 'category',
             }"
+            @click.prevent="toggleCategoryCollapsed(section.id)"
+            @contextmenu.prevent.stop="
+              (e) => {
+                activeMenuItem = { type: 'category', id: section.id, open: !section.collapsed };
+                menu.open(e, 168, 244);
+              }
+            "
           >
-            <div class="cursor-pointer" @click.prevent="toggleCategoryCollapsed(section.id)">
+            <div>
               <IconFolderOpen
                 v-if="section.id === UNCATEGORIZED || !section.collapsed"
                 class="size-5"
@@ -335,7 +348,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
               v-for="task in tasksOf(section.id)"
               :key="task.id"
               class="flex items-center gap-2 px-4 py-2 border-b border-base-300"
-              :class="[{ 'opacity-40': task.completed }]"
+              :class="[
+                {
+                  'opacity-40': task.completed,
+                  'text-primary': activeMenuItem.id === task.id && activeMenuItem.type === 'task',
+                },
+              ]"
               @contextmenu.prevent.stop="
                 (e) => {
                   activeMenuItem = { type: 'task', id: task.id, open: !task.completed };
