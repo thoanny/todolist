@@ -204,6 +204,12 @@ const onKeydown = (e: KeyboardEvent) => {
   }
 };
 
+const completedPc = (sectionId: string) => {
+  const min = tasksOf(sectionId).filter((task) => task.completed).length || 0;
+  const max = tasksOf(sectionId).length || 0;
+  return { min, max, pc: max > 0 ? Math.round((min / max) * 100) : null };
+};
+
 onMounted(() => {
   window.addEventListener('keydown', onKeydown);
   window.addEventListener('closeContextMenu', resetActiveMenuItem);
@@ -315,8 +321,6 @@ onBeforeUnmount(() => {
             class="flex gap-2 items-center py-2 px-4 border-b border-base-300 bg-base-200 cursor-pointer"
             :class="{
               'text-base-content/50': section.collapsed,
-              'text-primary':
-                activeMenuItem.id === section.id && activeMenuItem.type === 'category',
             }"
             @click.prevent="toggleCategoryCollapsed(section.id)"
             @contextmenu.prevent.stop="
@@ -330,10 +334,40 @@ onBeforeUnmount(() => {
               <IconFolderOpen
                 v-if="section.id === UNCATEGORIZED || !section.collapsed"
                 class="size-5"
+                :class="{
+                  'text-primary':
+                    activeMenuItem.id === section.id && activeMenuItem.type === 'category',
+                }"
               />
-              <IconFolder v-else class="size-5" />
+              <IconFolder
+                v-else
+                class="size-5"
+                :class="{
+                  'text-primary':
+                    activeMenuItem.id === section.id && activeMenuItem.type === 'category',
+                }"
+              />
             </div>
-            <h2 class="grow font-bold text-sm">{{ section.name }}</h2>
+            <h2
+              class="grow font-bold text-sm"
+              :class="{
+                'text-primary':
+                  activeMenuItem.id === section.id && activeMenuItem.type === 'category',
+              }"
+            >
+              {{ section.name }}
+            </h2>
+            <div v-if="completedPc(section.id).max" class="flex gap-2 items-center text-xs">
+              <span class="w-14 shrink-0 text-end">
+                {{ completedPc(section.id).min }}/{{ completedPc(section.id).max }}
+              </span>
+              <progress
+                class="progress progress-accent w-12 shrink-0 h-2"
+                :value="completedPc(section.id).min"
+                :max="completedPc(section.id).max"
+              ></progress>
+              <span class="w-8 shrink-0">{{ completedPc(section.id).pc }}%</span>
+            </div>
           </header>
 
           <VueDraggable
