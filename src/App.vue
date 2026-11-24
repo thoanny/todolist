@@ -350,7 +350,7 @@ onBeforeUnmount(() => {
               class="flex items-center gap-2 px-4 py-2 border-b border-base-300"
               :class="[
                 {
-                  'opacity-40': task.completed,
+                  'text-base-content/40': task.completed,
                   'text-primary': activeMenuItem.id === task.id && activeMenuItem.type === 'task',
                 },
               ]"
@@ -368,7 +368,7 @@ onBeforeUnmount(() => {
                 <IconGripVertical
                   class="size-4"
                   :class="{
-                    'text-base-content/50': !dragDisabled,
+                    'text-base-content/40': !dragDisabled,
                     'text-base-content/10': dragDisabled,
                   }"
                 />
